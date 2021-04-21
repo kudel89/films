@@ -1,68 +1,51 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MoviesList } from '../Components/MoviesList'
 import { Preloader } from '../Components/Preloader'
 import Search from '../Components/Search'
 
 const API_KEY = process.env.REACT_APP_API_KEY
 
-class Main extends Component {
-  state = {
-    movies: [],
-    loading: true,
-  }
+const Main = () => {
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  componentDidMount() {
+  useEffect(() => {
     fetch(`https://www.omdbapi.com/?i=tt3896198&apikey=${API_KEY}&s=matrix`)
       .then((response) => response.json())
-      .then((data) =>
-        this.setState({
-          movies: data.Search,
-          loading: false,
-        })
-      )
+      .then((data) => {
+        setMovies(data.Search)
+        setLoading(false)
+      })
       .catch((err) => {
         console.error(err)
-        this.setState({
-          loading: false,
-        })
+        setLoading(false)
       })
-  }
+  }, [])
 
-  searchMovies = (str, type = 'all') => {
-    this.setState({
-      loading: true,
-    })
+  const searchMovies = (str, type = 'all') => {
+    setLoading(true)
     fetch(
       `https://www.omdbapi.com/?i=tt3896198&apikey=${API_KEY}&s=${str}${
         type !== 'all' ? `&type=${type}` : ''
       }`
     )
       .then((response) => response.json())
-      .then((data) =>
-        this.setState({
-          movies: data.Search,
-          loading: false,
-        })
-      )
+      .then((data) => {
+        setMovies(data.Search)
+        setLoading(false)
+      })
       .catch((err) => {
         console.error(err)
-        this.setState({
-          loading: false,
-        })
+        setLoading(false)
       })
   }
 
-  render() {
-    const { movies, loading } = this.state
-
-    return (
-      <div className='container content'>
-        <Search searchMovies={this.searchMovies} />
-
-        {loading ? <Preloader /> : <MoviesList movies={movies} />}
-      </div>
-    )
-  }
+  return (
+    <div className='container content'>
+      <Search searchMovies={searchMovies} />
+      {loading ? <Preloader /> : <MoviesList movies={movies} />}
+    </div>
+  )
 }
 
 export default Main
